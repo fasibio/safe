@@ -9,15 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func test1() {
+func TestResultExample(t *testing.T) {
+	exp := assert.New(t)
 	result := safe.NewResult(somePossibleFailedFunc())
+	exp.True(result.IsOk())
 	if result.IsOk() {
+		log.Println("is no error")
 		//happy path
 	} else {
 		// not ok
 		err := result.Err()
 		log.Println(err)
-
 	}
 }
 

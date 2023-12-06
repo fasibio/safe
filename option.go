@@ -20,7 +20,7 @@ func (o Option[T]) IsSome() bool {
 	}
 	stringify := fmt.Sprintf("%v", *o.value)
 	switch stringify {
-	case "<nil>", "{}", "&{}":
+	case "<nil>", "{<nil>}", "&{<nil>}", "{}", "&{}":
 		return false
 	}
 

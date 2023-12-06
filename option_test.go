@@ -12,13 +12,17 @@ type TestStruct struct {
 	a string
 }
 
-func test2() {
+func TestOptionalExample(t *testing.T) {
+	exp := assert.New(t)
+
 	opt := safe.NewOption(SomeFunctionWichReturnPointer())
+	exp.True(opt.IsSome())
 	if opt.IsSome() {
 		// happy path
 		value, _ := opt.Some()
 		log.Println(value)
 	} else {
+		log.Println("is None")
 		// is not set
 	}
 
@@ -28,6 +32,7 @@ func test2() {
 		// happy path
 		log.Println(value)
 	} else {
+		log.Println("is None")
 		// is not set
 	}
 
@@ -71,6 +76,11 @@ func TestOption(t *testing.T) {
 		{
 			name:       "unhappy strange unset value double pointed",
 			value:      &doublePointed,
+			shouldSome: false,
+		},
+		{
+			name:       "unset stuff use safe.None()",
+			value:      safe.None[string](),
 			shouldSome: false,
 		},
 	}
