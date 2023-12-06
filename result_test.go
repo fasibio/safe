@@ -82,7 +82,7 @@ func TestResult(t *testing.T) {
 			if test.shouldOk {
 				exp.Equal(test.value, res.Ok())
 			} else {
-				exp.True(res.Err() != nil)
+				exp.NotNil(res.Err())
 			}
 
 		})
