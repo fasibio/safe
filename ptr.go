@@ -1,5 +1,5 @@
 package safe
 
-func GetPtr[T any](v T) *T {
+func Ptr[T any](v T) *T {
 	return &v
 }

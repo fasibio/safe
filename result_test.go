@@ -28,19 +28,19 @@ func TestCombined(t *testing.T) {
 
 	result := safe.NewResult(somePossibleFailedOptinalFunc(false))
 	i := -1
-	value := result.OkOrDefault(safe.Some(&i)).SomeOrDefault(safe.GetPtr(-1))
-	assert.Equal(t, safe.GetPtr(0), value)
+	value := result.OkOrDefault(safe.Some(&i)).SomeOrDefault(safe.Ptr(-1))
+	assert.Equal(t, safe.Ptr(0), value)
 
 	result = safe.NewResult(somePossibleFailedOptinalFunc(true))
-	value = result.OkOrDefault(safe.Some(&i)).SomeOrDefault(safe.GetPtr(-1))
-	assert.Equal(t, safe.GetPtr(-1), value)
+	value = result.OkOrDefault(safe.Some(&i)).SomeOrDefault(safe.Ptr(-1))
+	assert.Equal(t, safe.Ptr(-1), value)
 }
 
 func somePossibleFailedOptinalFunc(shoudErr bool) (safe.Option[int], error) {
 	if shoudErr {
 		return safe.None[int](), fmt.Errorf("Some error")
 	}
-	return safe.Some(safe.GetPtr(0)), nil
+	return safe.Some(safe.Ptr(0)), nil
 }
 
 func somePossibleFailedFunc() (int, error) {

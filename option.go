@@ -47,3 +47,22 @@ func (o Option[T]) SomeOrDefault(value *T) *T {
 	}
 	return value
 }
+
+func (o Option[T]) SomeOrDefaultFn(fn func() *T) *T {
+	if result, ok := o.Some(); ok {
+		return result
+	}
+	return fn()
+}
+
+func (o Option[T]) SomeAndThan(fn func(value *T)) {
+	if v, ok := o.Some(); ok {
+		fn(v)
+	}
+}
+
+func (o Option[T]) NoneAndThan(fn func()) {
+	if o.IsNone() {
+		fn()
+	}
+}
