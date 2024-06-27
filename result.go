@@ -9,7 +9,7 @@ type Result[T any] struct {
 
 func NewResult[T any](value T, err error) Result[T] {
 	return Result[T]{
-		value: NewOption[T](&value),
+		value: Some[T](&value),
 		err:   err,
 	}
 }

@@ -8,7 +8,7 @@ type Option[T any] struct {
 	value *T
 }
 
-func NewOption[T any](value *T) Option[T] {
+func Some[T any](value *T) Option[T] {
 	return Option[T]{value: value}
 }
 
@@ -41,10 +41,9 @@ func (o Option[T]) Some() (*T, bool) {
 	return o.value, o.IsSome()
 }
 
-func (o Option[T]) SomeOrDefault(value T) T {
-	if o.IsSome() {
-		result, _ := o.Some()
-		return *result
+func (o Option[T]) SomeOrDefault(value T) *T {
+	if result, ok := o.Some(); ok {
+		return result
 	}
-	return value
+	return &value
 }
