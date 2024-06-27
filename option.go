@@ -1,13 +1,15 @@
 package safe
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Option[T any] struct {
 	value *T
 }
 
-func NewOption[T any](value T) Option[T] {
-	return Option[T]{value: &value}
+func NewOption[T any](value *T) Option[T] {
+	return Option[T]{value: value}
 }
 
 func None[T any]() Option[T] {
@@ -18,6 +20,7 @@ func (o Option[T]) IsSome() bool {
 	if o.value == nil {
 		return false
 	}
+
 	stringify := fmt.Sprintf("%v", *o.value)
 	switch stringify {
 	case "<nil>", "{<nil>}", "&{<nil>}", "{}", "&{}":

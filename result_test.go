@@ -27,11 +27,12 @@ func TestCombined(t *testing.T) {
 	//or combined
 
 	result := safe.NewResult(somePossibleFailedOptinalFunc(false))
-	value := result.OkOrDefault(safe.NewOption(-1)).SomeOrDefault(-1)
+	i := -1
+	value := result.OkOrDefault(safe.NewOption(&i)).SomeOrDefault(-1)
 	assert.Equal(t, 0, value)
 
 	result = safe.NewResult(somePossibleFailedOptinalFunc(true))
-	value = result.OkOrDefault(safe.NewOption(-1)).SomeOrDefault(-1)
+	value = result.OkOrDefault(safe.NewOption(&i)).SomeOrDefault(-1)
 	assert.Equal(t, -1, value)
 }
 
@@ -39,7 +40,7 @@ func somePossibleFailedOptinalFunc(shoudErr bool) (safe.Option[int], error) {
 	if shoudErr {
 		return safe.None[int](), fmt.Errorf("Some error")
 	}
-	return safe.NewOption(0), nil
+	return safe.NewOption(safe.GetPtr(0)), nil
 }
 
 func somePossibleFailedFunc() (int, error) {

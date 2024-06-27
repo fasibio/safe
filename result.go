@@ -9,7 +9,7 @@ type Result[T any] struct {
 
 func NewResult[T any](value T, err error) Result[T] {
 	return Result[T]{
-		value: NewOption[T](value),
+		value: NewOption[T](&value),
 		err:   err,
 	}
 }
@@ -30,7 +30,7 @@ func (r Result[T]) Err() error {
 		return r.err
 	}
 	if r.value.IsNone() {
-		return fmt.Errorf("Err was nil but no value as well")
+		return fmt.Errorf("Err was nil but no value as excepted")
 	}
 	return nil
 }
