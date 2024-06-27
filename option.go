@@ -41,9 +41,9 @@ func (o Option[T]) Some() (*T, bool) {
 	return o.value, o.IsSome()
 }
 
-func (o Option[T]) SomeOrDefault(value T) *T {
+func (o Option[T]) SomeOrDefault(value *T) *T {
 	if result, ok := o.Some(); ok {
 		return result
 	}
-	return &value
+	return value
 }

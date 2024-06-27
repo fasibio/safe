@@ -28,11 +28,11 @@ func TestCombined(t *testing.T) {
 
 	result := safe.NewResult(somePossibleFailedOptinalFunc(false))
 	i := -1
-	value := result.OkOrDefault(safe.Some(&i)).SomeOrDefault(-1)
+	value := result.OkOrDefault(safe.Some(&i)).SomeOrDefault(safe.GetPtr(-1))
 	assert.Equal(t, safe.GetPtr(0), value)
 
 	result = safe.NewResult(somePossibleFailedOptinalFunc(true))
-	value = result.OkOrDefault(safe.Some(&i)).SomeOrDefault(-1)
+	value = result.OkOrDefault(safe.Some(&i)).SomeOrDefault(safe.GetPtr(-1))
 	assert.Equal(t, safe.GetPtr(-1), value)
 }
 
