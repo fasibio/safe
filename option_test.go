@@ -9,10 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type TestStruct struct {
-	a string
-}
-
 func TestOptionalExample(t *testing.T) {
 	exp := assert.New(t)
 
