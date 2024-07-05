@@ -1,33 +1,28 @@
 package safe
 
 import (
-	"fmt"
+	"errors"
 )
+
+var ErrValueIsNil = errors.New("Value is nil")
 
 type Option[T any] struct {
 	value *T
 }
 
 func Some[T any](value *T) Option[T] {
+	if value == nil {
+		return None[T]()
+	}
 	return Option[T]{value: value}
 }
 
 func None[T any]() Option[T] {
-	return Option[T]{}
+	return Option[T]{value: nil}
 }
 
 func (o Option[T]) IsSome() bool {
-	if o.value == nil {
-		return false
-	}
-
-	stringify := fmt.Sprintf("%v", *o.value)
-	switch stringify {
-	case "<nil>", "{<nil>}", "&{<nil>}", "{}", "&{}":
-		return false
-	}
-
-	return true
+	return o.value != nil
 }
 
 func (o Option[T]) IsNone() bool {
@@ -35,10 +30,11 @@ func (o Option[T]) IsNone() bool {
 }
 
 func (o Option[T]) Some() (*T, bool) {
-	if o.IsNone() {
-		return nil, false
+
+	if o.IsSome() {
+		return o.value, true
 	}
-	return o.value, o.IsSome()
+	return nil, false
 }
 
 func (o Option[T]) SomeOrDefault(value *T) *T {
@@ -55,14 +51,29 @@ func (o Option[T]) SomeOrDefaultFn(fn func() *T) *T {
 	return fn()
 }
 
-func (o Option[T]) SomeAndThan(fn func(value *T)) {
+func (o Option[T]) SomeAndThen(fn func(value *T)) {
 	if v, ok := o.Some(); ok {
 		fn(v)
 	}
 }
 
-func (o Option[T]) NoneAndThan(fn func()) {
+func (o Option[T]) NoneAndThen(fn func()) {
 	if o.IsNone() {
 		fn()
 	}
+}
+
+func (o Option[T]) CopyOrDefault(defaultValue T) T {
+	if v, ok := o.Some(); ok {
+		return *v
+	}
+	return defaultValue
+}
+
+func (o Option[T]) CopySome() (T, bool) {
+	if v, ok := o.Some(); ok {
+		return *v, true
+	}
+	var d T
+	return d, false
 }
