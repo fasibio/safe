@@ -37,6 +37,10 @@ func (o Option[T]) Some() (*T, bool) {
 	return nil, false
 }
 
+func (o Option[T]) Unwrap() *T {
+	return o.value
+}
+
 func (o Option[T]) SomeOrDefault(value *T) *T {
 	if result, ok := o.Some(); ok {
 		return result
