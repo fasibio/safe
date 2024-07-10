@@ -55,6 +55,13 @@ func (o Option[T]) SomeOrDefaultFn(fn func() *T) *T {
 	return fn()
 }
 
+func (o Option[T]) SomeOrError(e error) (*T, error) {
+	if v, ok := o.Some(); ok {
+		return v, nil
+	}
+	return nil, e
+}
+
 func (o Option[T]) SomeAndThen(fn func(value *T)) {
 	if v, ok := o.Some(); ok {
 		fn(v)
