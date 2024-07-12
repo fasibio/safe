@@ -10,6 +10,7 @@ import (
 	"github.com/gkampitakis/go-snaps/snaps"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOptionalExample(t *testing.T) {
@@ -310,11 +311,12 @@ func TestSomeOrError(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			assert := assert.New(t)
+			require := require.New(t)
 			v, err := safe.Some(test.value).SomeOrError(test.errorValue)
 			if test.wantError {
-				assert.Error(err)
+				require.Error(err)
 			} else {
-				assert.Nil(err)
+				require.NoError(err)
 				assert.Equal(v, test.value)
 			}
 
@@ -353,12 +355,13 @@ func TestMarshalAndUnmarshal(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			assert := assert.New(t)
+			require := require.New(t)
 			res, err := json.Marshal(&test.value)
-			assert.NoError(err)
+			require.NoError(err)
 			snaps.MatchSnapshot(t, string(res))
 			var res2 TestStruct
 			err = json.Unmarshal(res, &res2)
-			assert.NoError(err)
+			require.NoError(err)
 			assert.Equal(test.value, safe.Some(&res2))
 		})
 	}

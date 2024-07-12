@@ -61,7 +61,7 @@ run:
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate|junit-xml|github-actions
   # default is "colored-line-number"
-  format: colored-line-number
+  formats: colored-line-number
 
   # print lines of code with issue, default is true
   print-issued-lines: true
@@ -305,10 +305,8 @@ linters-settings:
     min-confidence: 0.8
 
   gomnd:
-    settings:
-      mnd:
         # the list of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
-        checks: argument,case,condition,operation,return,assign
+    checks: argument,case,condition,operation,return,assign
         # ignored-numbers: 1000
         # ignored-files: magic_.*.go
         # ignored-functions: math.*
@@ -364,11 +362,6 @@ linters-settings:
         entropy_threshold: "80.0"
         per_char_threshold: "3.0"
         truncate: "32"
-  gosimple:
-    # Select the Go version to target. The default is '1.13'.
-    go: "1.20"
-    # https://staticcheck.io/docs/options#checks
-    checks: [ "all" ]
 
   govet:
     # report about shadowed variables
@@ -518,13 +511,7 @@ linters-settings:
             allowInts: "0,1,2"
             allowFloats: "0.0,0.,1.0,1.,2.0,2."
 
-  staticcheck:
-    # Select the Go version to target. The default is '1.13'.
-    go: "1.20"
-    # https://staticcheck.io/docs/options#checks
-    checks: [ "all" ]
-
-  stylecheck:
+  run:
     # Select the Go version to target. The default is '1.13'.
     go: "1.20"
     # https://staticcheck.io/docs/options#checks
