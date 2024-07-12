@@ -1,10 +1,13 @@
 package safe_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"testing"
 
 	"github.com/fasibio/safe"
+	"github.com/gkampitakis/go-snaps/snaps"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -280,6 +283,83 @@ func TestCopyOrDefault(t *testing.T) {
 				res = *test.value - 2
 				assert.NotEqual(*test.value, res)
 			}
+		})
+	}
+}
+
+func TestSomeOrError(t *testing.T) {
+	tests := []struct {
+		name       string
+		value      *int
+		errorValue error
+		wantError  bool
+	}{
+		{
+			name:       "value is Some",
+			value:      safe.Ptr(10),
+			errorValue: fmt.Errorf("Some error"),
+			wantError:  false,
+		},
+		{
+			name:       "value is None",
+			value:      nil,
+			errorValue: fmt.Errorf("Some error"),
+			wantError:  true,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert := assert.New(t)
+			v, err := safe.Some(test.value).SomeOrError(test.errorValue)
+			if test.wantError {
+				assert.Error(err)
+			} else {
+				assert.Nil(err)
+				assert.Equal(v, test.value)
+			}
+
+		})
+	}
+}
+
+type TestStruct struct {
+	A int              `json:"a,omitempty"`
+	B safe.Option[int] `json:"b,omitempty"`
+	C string           `json:"c,omitempty"`
+}
+
+func TestMarshalAndUnmarshal(t *testing.T) {
+	tests := []struct {
+		name  string
+		value safe.Option[TestStruct]
+	}{
+		{
+			name: "All is filled",
+			value: safe.Some(&TestStruct{
+				A: 1,
+				B: safe.Some(safe.Ptr(10)),
+				C: "test",
+			}),
+		},
+		{
+			name: "B is None",
+			value: safe.Some(&TestStruct{
+				A: 1,
+				B: safe.None[int](),
+				C: "test",
+			}),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert := assert.New(t)
+			res, err := json.Marshal(&test.value)
+			assert.NoError(err)
+			snaps.MatchSnapshot(t, string(res))
+			var res2 TestStruct
+			err = json.Unmarshal(res, &res2)
+			assert.NoError(err)
+			assert.Equal(test.value, safe.Some(&res2))
 		})
 	}
 }

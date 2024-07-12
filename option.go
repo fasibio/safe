@@ -1,6 +1,7 @@
 package safe
 
 import (
+	"encoding/json"
 	"errors"
 )
 
@@ -87,4 +88,25 @@ func (o Option[T]) CopySome() (T, bool) {
 	}
 	var d T
 	return d, false
+}
+
+var _ json.Marshaler = (*Option[any])(nil)
+var _ json.Unmarshaler = (*Option[any])(nil)
+
+func (e *Option[T]) UnmarshalJSON(data []byte) error {
+	if string(data) == "null" {
+		e.value = nil
+		return nil
+	}
+	var v T
+	err := json.Unmarshal(data, &v)
+	if err != nil {
+		return err
+	}
+	e.value = &v
+	return nil
+}
+
+func (e *Option[T]) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.value)
 }
