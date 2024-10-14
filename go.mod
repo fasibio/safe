@@ -7,6 +7,7 @@ toolchain go1.22.2
 require (
 	github.com/gkampitakis/go-snaps v0.5.4
 	github.com/stretchr/testify v1.8.4
+	go.mongodb.org/mongo-driver v1.17.1
 )
 
 require (
