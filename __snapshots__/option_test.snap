@@ -1,8 +1,0 @@
-
-[TestMarshalAndUnmarshal/All_is_filled - 1]
-{"a":1,"b":10,"c":"test"}
----
-
-[TestMarshalAndUnmarshal/B_is_None - 1]
-{"a":1,"b":null,"c":"test"}
----

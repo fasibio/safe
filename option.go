@@ -3,11 +3,23 @@ package safe
 import (
 	"encoding/json"
 	"errors"
-
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 var ErrValueIsNil = errors.New("Value is nil")
+
+type Optioner[T any] interface {
+	IsSome() bool
+	IsNone() bool
+	Some() (*T, bool)
+	Unwrap() *T
+	SomeOrDefault(value *T) *T
+	SomeOrDefaultFn(fn func() *T) *T
+	SomeOrError(e error) (*T, error)
+	SomeAndThen(fn func(value *T))
+	NoneAndThen(fn func())
+	CopyOrDefault(defaultValue T) T
+	CopySome() (T, bool)
+}
 
 type Option[T any] struct {
 	value *T
@@ -111,23 +123,4 @@ func (e *Option[T]) UnmarshalJSON(data []byte) error {
 
 func (e *Option[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.value)
-}
-
-func (o *Option[T]) UnmarshalBSON(data []byte) error {
-	if string(data) == "null" {
-		o.value = nil
-		return nil
-	}
-	var v T
-	err := bson.Unmarshal(data, &v)
-	if err != nil {
-		return err
-	}
-	o.value = &v
-
-	return nil
-}
-
-func (o *Option[T]) MarshalBSON() ([]byte, error) {
-	return bson.Marshal(o.value)
 }
