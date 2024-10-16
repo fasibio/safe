@@ -7,20 +7,6 @@ import (
 
 var ErrValueIsNil = errors.New("Value is nil")
 
-type Optioner[T any] interface {
-	IsSome() bool
-	IsNone() bool
-	Some() (*T, bool)
-	Unwrap() *T
-	SomeOrDefault(value *T) *T
-	SomeOrDefaultFn(fn func() *T) *T
-	SomeOrError(e error) (*T, error)
-	SomeAndThen(fn func(value *T))
-	NoneAndThen(fn func())
-	CopyOrDefault(defaultValue T) T
-	CopySome() (T, bool)
-}
-
 type Option[T any] struct {
 	value *T
 }
