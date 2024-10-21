@@ -90,6 +90,13 @@ func (o Option[T]) CopySome() (T, bool) {
 	return d, false
 }
 
+func SomeAndMap[T any, P any](o Option[T], fn func(*T) Option[P]) Option[P] {
+	if v, ok := o.Some(); ok {
+		return fn(v)
+	}
+	return None[P]()
+}
+
 var _ json.Marshaler = (*Option[any])(nil)
 var _ json.Unmarshaler = (*Option[any])(nil)
 
