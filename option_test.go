@@ -366,3 +366,46 @@ func TestMarshalAndUnmarshal(t *testing.T) {
 		})
 	}
 }
+
+func TestSomeAndMap(t *testing.T) {
+	type testStruct struct {
+		A string
+	}
+
+	type args struct {
+		o  safe.Option[testStruct]
+		fn func(*testStruct) safe.Option[string]
+	}
+	tests := []struct {
+		name string
+		args args
+		want safe.Option[string]
+	}{
+		{
+			name: "simple test",
+			args: args{
+				o: safe.Some(&testStruct{A: "foo"}),
+				fn: func(ts *testStruct) safe.Option[string] {
+					return safe.SomePtr(ts.A)
+				},
+			},
+			want: safe.SomePtr("foo"),
+		},
+		{
+			name: "none",
+			args: args{
+				o: safe.None[testStruct](),
+				fn: func(ts *testStruct) safe.Option[string] {
+					return safe.SomePtr(ts.A)
+				},
+			},
+			want: safe.None[string](),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := safe.SomeAndMap(tt.args.o, tt.args.fn)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
