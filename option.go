@@ -129,6 +129,6 @@ func (e *Option[T]) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (e *Option[T]) MarshalJSON() ([]byte, error) {
+func (e Option[T]) MarshalJSON() ([]byte, error) {
 	return json.Marshal(e.value)
 }
