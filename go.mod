@@ -1,6 +1,8 @@
 module github.com/fasibio/safe
 
-go 1.25.6
+go 1.22
+
+toolchain go1.23.4
 
 require (
 	github.com/gkampitakis/go-snaps v0.5.4
