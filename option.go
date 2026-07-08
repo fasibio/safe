@@ -10,7 +10,9 @@ var ErrValueIsNil = errors.New("Value is nil")
 
 func isNil[T any](value T) bool {
 	v := reflect.ValueOf(value)
-
+	if !v.IsValid() {
+		return true
+	}
 	switch v.Kind() {
 	case reflect.Chan,
 		reflect.Func,
@@ -25,36 +27,39 @@ func isNil[T any](value T) bool {
 }
 
 // Wrapper around potenzial nil Values. Force nil checks before T can be used.
-type Option[T any] []T
+type Option[T any] struct {
+	value  T
+	isNone bool
+}
 
 // Some creates an option of type T could nil.
 func Some[T any](value T) Option[T] {
 	if isNil(value) {
 		return None[T]()
 	}
-	return Option[T]{0: value}
+	return Option[T]{value: value, isNone: false}
 }
 
 // None create a None Option by given T.
 func None[T any]() Option[T] {
-	return nil
+	return Option[T]{isNone: true}
 }
 
 // IsSome returns true if the Option contains a value.
 func (o Option[T]) IsSome() bool {
-	return o != nil
+	return !o.IsNone()
 }
 
 // IsNone returns true if the Option is empty.
 func (o Option[T]) IsNone() bool {
-	return !o.IsSome()
+	return o.isNone
 }
 
 // Some returns the value and true if Option is not empty, otherwise nil and false.
 func (o Option[T]) Some() (T, bool) {
 
 	if o.IsSome() {
-		return o[0], true
+		return o.value, true
 	}
 	var t T
 	return t, false
@@ -62,7 +67,7 @@ func (o Option[T]) Some() (T, bool) {
 
 // Unwrap returns the contained value without a nil check (use with caution).
 func (o Option[T]) Unwrap() T {
-	return o[0]
+	return o.value
 }
 
 // SomeOrDefault returns the value if present, otherwise returns the provided default value.
@@ -144,13 +149,18 @@ func (o *Option[T]) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*o = Option[T]{0: v}
+	*o = Option[T]{value: v, isNone: false}
 	return nil
 }
 
 func (o Option[T]) MarshalJSON() ([]byte, error) {
 	if s, ok := o.Some(); ok {
-		return json.Marshal(s)
+		b, err := json.Marshal(s)
+		return b, err
 	}
-	return nil, nil
+	return []byte("null"), nil
+}
+
+func (o Option[T]) IsZero() bool {
+	return o.IsNone()
 }
