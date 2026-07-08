@@ -3,31 +3,46 @@ package safe
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
 )
 
 var ErrValueIsNil = errors.New("Value is nil")
 
-// Wrapper around potenzial nil Values. Force nil checks before T can be used.
-type Option[T any] struct {
-	value *T
+func isNil[T any](value T) bool {
+	v := reflect.ValueOf(value)
+
+	switch v.Kind() {
+	case reflect.Chan,
+		reflect.Func,
+		reflect.Interface,
+		reflect.Map,
+		reflect.Pointer,
+		reflect.Slice:
+		return v.IsNil()
+	default:
+		return false
+	}
 }
 
+// Wrapper around potenzial nil Values. Force nil checks before T can be used.
+type Option[T any] []T
+
 // Some creates an option of type T could nil.
-func Some[T any](value *T) Option[T] {
-	if value == nil {
+func Some[T any](value T) Option[T] {
+	if isNil(value) {
 		return None[T]()
 	}
-	return Option[T]{value: value}
+	return Option[T]{0: value}
 }
 
 // None create a None Option by given T.
 func None[T any]() Option[T] {
-	return Option[T]{value: nil}
+	return nil
 }
 
 // IsSome returns true if the Option contains a value.
 func (o Option[T]) IsSome() bool {
-	return o.value != nil
+	return o != nil
 }
 
 // IsNone returns true if the Option is empty.
@@ -36,21 +51,22 @@ func (o Option[T]) IsNone() bool {
 }
 
 // Some returns the value and true if Option is not empty, otherwise nil and false.
-func (o Option[T]) Some() (*T, bool) {
+func (o Option[T]) Some() (T, bool) {
 
 	if o.IsSome() {
-		return o.value, true
+		return o[0], true
 	}
-	return nil, false
+	var t T
+	return t, false
 }
 
 // Unwrap returns the contained value without a nil check (use with caution).
-func (o Option[T]) Unwrap() *T {
-	return o.value
+func (o Option[T]) Unwrap() T {
+	return o[0]
 }
 
 // SomeOrDefault returns the value if present, otherwise returns the provided default value.
-func (o Option[T]) SomeOrDefault(value *T) *T {
+func (o Option[T]) SomeOrDefault(value T) T {
 	if result, ok := o.Some(); ok {
 		return result
 	}
@@ -58,7 +74,7 @@ func (o Option[T]) SomeOrDefault(value *T) *T {
 }
 
 // SomeOrDefaultFn returns the value if present, otherwise calls the provided function to generate a default.
-func (o Option[T]) SomeOrDefaultFn(fn func() *T) *T {
+func (o Option[T]) SomeOrDefaultFn(fn func() T) T {
 	if result, ok := o.Some(); ok {
 		return result
 	}
@@ -66,15 +82,16 @@ func (o Option[T]) SomeOrDefaultFn(fn func() *T) *T {
 }
 
 // SomeOrError returns the value if present, otherwise returns the provided error.
-func (o Option[T]) SomeOrError(e error) (*T, error) {
+func (o Option[T]) SomeOrError(e error) (T, error) {
 	if v, ok := o.Some(); ok {
 		return v, nil
 	}
-	return nil, e
+	var t T
+	return t, e
 }
 
 // SomeAndThen calls the provided function if Option contains a value.
-func (o Option[T]) SomeAndThen(fn func(value *T)) {
+func (o Option[T]) SomeAndThen(fn func(value T)) {
 	if v, ok := o.Some(); ok {
 		fn(v)
 	}
@@ -88,24 +105,26 @@ func (o Option[T]) NoneAndThen(fn func()) {
 }
 
 // CopyOrDefault returns a copy of the value if present, otherwise returns the default value.
+// deprecated use Some or default instand
 func (o Option[T]) CopyOrDefault(defaultValue T) T {
 	if v, ok := o.Some(); ok {
-		return *v
+		return v
 	}
 	return defaultValue
 }
 
 // CopySome returns a copy of the value and true if present, otherwise a zero-value and false.
+// deprecated use Some instand
 func (o Option[T]) CopySome() (T, bool) {
 	if v, ok := o.Some(); ok {
-		return *v, true
+		return v, true
 	}
 	var d T
 	return d, false
 }
 
 // Transforms an Option[T] to an Option[P] using the provided function.
-func SomeAndMap[T any, P any](o Option[T], fn func(*T) Option[P]) Option[P] {
+func SomeAndMap[T any, P any](o Option[T], fn func(T) Option[P]) Option[P] {
 	if v, ok := o.Some(); ok {
 		return fn(v)
 	}
@@ -115,9 +134,9 @@ func SomeAndMap[T any, P any](o Option[T], fn func(*T) Option[P]) Option[P] {
 var _ json.Marshaler = (*Option[any])(nil)
 var _ json.Unmarshaler = (*Option[any])(nil)
 
-func (e *Option[T]) UnmarshalJSON(data []byte) error {
+func (o *Option[T]) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
-		e.value = nil
+		*o = None[T]()
 		return nil
 	}
 	var v T
@@ -125,10 +144,13 @@ func (e *Option[T]) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	e.value = &v
+	*o = Option[T]{0: v}
 	return nil
 }
 
-func (e Option[T]) MarshalJSON() ([]byte, error) {
-	return json.Marshal(e.value)
+func (o Option[T]) MarshalJSON() ([]byte, error) {
+	if s, ok := o.Some(); ok {
+		return json.Marshal(s)
+	}
+	return nil, nil
 }

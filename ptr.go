@@ -6,6 +6,6 @@ func Ptr[T any](v T) *T {
 }
 
 // SomePtr returns an option of  pointer of T.
-func SomePtr[T any](v T) Option[T] {
+func SomePtr[T any](v T) Option[*T] {
 	return Some(Ptr(v))
 }
