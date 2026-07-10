@@ -350,6 +350,13 @@ func TestMarshalAndUnmarshal(t *testing.T) {
 				C: "test",
 			}),
 		},
+		{
+			name: "B is not set",
+			value: safe.Some(TestStruct{
+				A: 1,
+				C: "test",
+			}),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

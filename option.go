@@ -29,7 +29,7 @@ func isNil[T any](value T) bool {
 // Wrapper around potenzial nil Values. Force nil checks before T can be used.
 type Option[T any] struct {
 	value  T
-	isNone bool
+	isSome bool
 }
 
 // Some creates an option of type T could nil.
@@ -37,22 +37,22 @@ func Some[T any](value T) Option[T] {
 	if isNil(value) {
 		return None[T]()
 	}
-	return Option[T]{value: value, isNone: false}
+	return Option[T]{value: value, isSome: true}
 }
 
 // None create a None Option by given T.
 func None[T any]() Option[T] {
-	return Option[T]{isNone: true}
+	return Option[T]{isSome: false}
 }
 
 // IsSome returns true if the Option contains a value.
 func (o Option[T]) IsSome() bool {
-	return !o.IsNone()
+	return o.isSome
 }
 
 // IsNone returns true if the Option is empty.
 func (o Option[T]) IsNone() bool {
-	return o.isNone
+	return !o.IsSome()
 }
 
 // Some returns the value and true if Option is not empty, otherwise nil and false.
@@ -149,7 +149,7 @@ func (o *Option[T]) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	*o = Option[T]{value: v, isNone: false}
+	*o = Option[T]{value: v, isSome: true}
 	return nil
 }
 
