@@ -55,7 +55,7 @@ func TestOption(t *testing.T) {
 	tests := []OptionTest[int]{
 		{
 			Name:        "simple happy path test",
-			InputOption: safe.Some(safe.Ptr(1)),
+			InputOption: safe.Some(1),
 			ShouldSome:  true,
 			ShouldValue: 1,
 		},
@@ -66,7 +66,7 @@ func TestOption(t *testing.T) {
 		},
 		{
 			Name:        "simple unhappy path test",
-			InputOption: safe.Some[int](nil),
+			InputOption: safe.None[int](),
 			ShouldSome:  false,
 		},
 	}
@@ -80,7 +80,7 @@ func TestOption(t *testing.T) {
 			value, ok := option.Some()
 			exp.Equal(test.ShouldSome, ok)
 			if ok {
-				exp.Equal(test.ShouldValue, *value)
+				exp.Equal(test.ShouldValue, value)
 			}
 
 		})
@@ -97,7 +97,7 @@ func TestDefault(t *testing.T) {
 		{
 			OptionTest: OptionTest[int]{
 				Name:        "simple happy path test",
-				InputOption: safe.Some(safe.Ptr(1)),
+				InputOption: safe.Some(1),
 				ShouldSome:  true,
 				ShouldValue: 1,
 			},
@@ -115,7 +115,7 @@ func TestDefault(t *testing.T) {
 		{
 			OptionTest: OptionTest[int]{
 				Name:        "simple unhappy path test  use default 2",
-				InputOption: safe.Some[int](nil),
+				InputOption: safe.None[int](),
 				ShouldSome:  false,
 				ShouldValue: 10,
 			},
@@ -129,8 +129,8 @@ func TestDefault(t *testing.T) {
 			option := test.InputOption
 			isSome := option.IsSome()
 			exp.Equal(test.ShouldSome, isSome)
-			value := option.SomeOrDefault(&test.DefaultValue)
-			exp.Equal(test.ShouldValue, *value)
+			value := option.SomeOrDefault(test.DefaultValue)
+			exp.Equal(test.ShouldValue, value)
 		})
 	}
 }
@@ -147,7 +147,6 @@ func (m *MockSomeFn) SomeOrDefaultFn() *int {
 
 func (m *MockSomeFn) SomeAndThenFn(v *int) {
 	m.Called(v)
-
 }
 
 func (m *MockSomeFn) NoneAndThenFn() {
@@ -274,14 +273,14 @@ func TestCopyOrDefault(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			assert := assert.New(t)
 			option := safe.Some(test.value)
-			res := option.CopyOrDefault(test.defaultValue)
+			res := option.SomeOrDefault(&test.defaultValue)
 			if test.shouldDefaultReturn {
-				assert.Equal(test.defaultValue, res)
-				res = test.defaultValue - 2
+				assert.Equal(test.defaultValue, *res)
+				res = safe.Ptr(test.defaultValue - 2)
 				assert.NotEqual(test.defaultValue, res)
 			} else {
-				assert.Equal(*test.value, res)
-				res = *test.value - 2
+				assert.Equal(test.value, res)
+				res = safe.Ptr(*test.value - 2)
 				assert.NotEqual(*test.value, res)
 			}
 		})
@@ -337,17 +336,24 @@ func TestMarshalAndUnmarshal(t *testing.T) {
 	}{
 		{
 			name: "All is filled",
-			value: safe.Some(&TestStruct{
+			value: safe.Some(TestStruct{
 				A: 1,
-				B: safe.Some(safe.Ptr(10)),
+				B: safe.Some(10),
 				C: "test",
 			}),
 		},
 		{
 			name: "B is None",
-			value: safe.Some(&TestStruct{
+			value: safe.Some(TestStruct{
 				A: 1,
 				B: safe.None[int](),
+				C: "test",
+			}),
+		},
+		{
+			name: "B is not set",
+			value: safe.Some(TestStruct{
+				A: 1,
 				C: "test",
 			}),
 		},
@@ -362,7 +368,7 @@ func TestMarshalAndUnmarshal(t *testing.T) {
 			var res2 TestStruct
 			err = json.Unmarshal(res, &res2)
 			require.NoError(err)
-			assert.Equal(test.value, safe.Some(&res2))
+			assert.Equal(test.value, safe.Some(res2))
 		})
 	}
 }
@@ -374,7 +380,7 @@ func TestSomeAndMap(t *testing.T) {
 
 	type args struct {
 		o  safe.Option[testStruct]
-		fn func(*testStruct) safe.Option[string]
+		fn func(testStruct) safe.Option[string]
 	}
 	tests := []struct {
 		name string
@@ -384,19 +390,19 @@ func TestSomeAndMap(t *testing.T) {
 		{
 			name: "simple test",
 			args: args{
-				o: safe.Some(&testStruct{A: "foo"}),
-				fn: func(ts *testStruct) safe.Option[string] {
-					return safe.SomePtr(ts.A)
+				o: safe.Some(testStruct{A: "foo"}),
+				fn: func(ts testStruct) safe.Option[string] {
+					return safe.Some(ts.A)
 				},
 			},
-			want: safe.SomePtr("foo"),
+			want: safe.Some("foo"),
 		},
 		{
 			name: "none",
 			args: args{
 				o: safe.None[testStruct](),
-				fn: func(ts *testStruct) safe.Option[string] {
-					return safe.SomePtr(ts.A)
+				fn: func(ts testStruct) safe.Option[string] {
+					return safe.Some(ts.A)
 				},
 			},
 			want: safe.None[string](),

@@ -1,12 +1,12 @@
 module github.com/fasibio/safe
 
-go 1.21
+go 1.22
 
-toolchain go1.22.2
+toolchain go1.23.4
 
 require (
 	github.com/gkampitakis/go-snaps v0.5.4
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
@@ -18,7 +18,7 @@ require (
 	github.com/maruel/natural v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tidwall/gjson v1.17.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
